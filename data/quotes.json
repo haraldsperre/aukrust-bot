@@ -192,7 +192,7 @@
       "Kjøra, kjøra! Farli' norsk hengebro! Kjøra, tempo!",
       "Her er like stille som i den ørken! Alle mennesker må være innehus!",
       "{user}, komme hit og banke på i den dør!",
-      "Salam, salam. {user} beskytte du og din hus!",
+      "Salam, salam. {OP} beskytte du og din hus!",
       "Jeg komme fra langtifra, og kikke på den {user} sammen med min sjåfør.",
       "Ikke vara redd! Nei, nei! Den {user} ikke være farlig, bare nysgjerrig! Masse masse nysgjerrig!",
       "Ah! Du væra den sykkelreparatør {user}?",
@@ -218,7 +218,7 @@
   {
     "triggers": [
       "Flåklypa",
-      "Motor GP"
+      "MotoGP"
     ],
     "quotes": [
       "Her har vi sensasjonsmannen i internasjonal motorsport for tiden, {user}, etter å ha vunnet sin tredje Grand Prix-seier på rad.",

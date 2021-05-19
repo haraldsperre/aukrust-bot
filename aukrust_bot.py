@@ -50,8 +50,9 @@ class ReplyBot:
 
   def get_legal_quote(self, comment):
     for character in self.quotes:
-      if any([trigger in comment] for trigger in character):
+      if any([trigger in comment for trigger in character['triggers']]):
         quotes = character['quotes']
+        break
     return choice(quotes)
 
   def get_comment_from_id(self, id):
