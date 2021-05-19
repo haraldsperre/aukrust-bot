@@ -1,0 +1,18 @@
+{
+	"TEST": [
+		{
+			"name": "testingground4bots"
+		}
+	],
+	"PRODUCTION": [
+		{
+			"name": "norge"
+		},
+		{
+			"name": "nordvei"
+		},
+		{
+			"name": "nordicmemes"
+		}
+	]
+}
