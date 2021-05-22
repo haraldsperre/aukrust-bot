@@ -23,6 +23,8 @@ class ReplyBot:
       subs = json.load(subreddits_file)[self.environment]
       self.subreddits = '+'.join([sub['name'] for sub in subs]) # get '+'-separated list of subreddits
                                                                 # e.g '/r/WOT+wetlanderhumor'
+      self.subreddits_w_flairs = subs
+
     with io.open('data/quotes.json', mode='r', encoding='utf-8') as quotes_file:
       self.quotes = json.load(quotes_file)  # create a list of all quotes
       self.keywords = sum([
@@ -63,6 +65,31 @@ class ReplyBot:
     with open('data/blocked_users', mode='a') as blocked_file:
       blocked_file.write(user)
 
+  def get_intent(self, comment):
+    author = comment.author.name.lower()
+    sub = next(x for x in self.subreddits_w_flairs if x['name'] == comment.subreddit.display_name)
+    if (
+        author == self.USER_NAME or
+        author in self.blocked_users or
+        comment.id in self.answered_comments or (
+        comment.submission.link_flair_text is not None and
+        comment.submission.link_flair_text.lower() in sub['flair-blacklist']
+        )
+      ):
+      return False
+    if ( 
+      comment.parent().author is not None and
+      comment.parent().author.name.lower() == self.USER_NAME and
+      comment.body.lower().find('!stop') == 0
+      ):
+      return 'block'
+    if (any(re.search(keyword, comment.body, re.IGNORECASE) for keyword in self.keywords) and 
+        ( len(sub['flair-whitelist']) == 0 or
+        comment.submission.link_flair_text is None or
+        comment.submission.link_flair_text.lower() in sub['flair-whitelist']
+        )):
+      return 'reply'
+
   def reply_bot(self):
     while True:
       self.log(f'\n\nRunning {self.SITE_NAME} on reddit.com/r/' + self.subreddits)
@@ -71,29 +98,24 @@ class ReplyBot:
                                                                             # from chosen subreddits
           comment_text = comment.body
           comment_id = comment.id
-          if (
-              comment.author.name.lower() != self.USER_NAME and
-              comment.author.name not in self.blocked_users and
-              comment_id not in self.answered_comments
-              ):
-            if ( comment.parent().author == self.USER_NAME and # allow users to reply with
-              comment_text.lower().find('!stop') == 0 ):                # !stop to be blocked from replies
-              author = comment.author.name
-              self.log(f'blocking user {author}')
-              self.block_user(author)
-            elif any(re.search(keyword, comment_text, re.IGNORECASE) for keyword in self.keywords):
-              quote = self.get_legal_quote(comment_text)
-              reply = quote.replace('{user}', f'/u/{comment.author.name}') # personalize some quotes
-              reply = reply.replace('{OP}', f'/u/{comment.submission.author.name}')
-              reply = reply.replace('{sub}', f'/r/{comment.subreddit.display_name}')
-              try:                           # try to reply to the comment
-                comment.reply(reply)
-              except APIException as e: # in case of too many requests, propagate the error
-                raise e                 # to the outer try, wait and try again
-              else:
-                print(comment_text)
-                print(reply)
-                self.register_reply(comment_id)
+          intent = self.get_intent(comment)
+          if intent == 'block': # allow users to reply with 
+            author = comment.author.name  # !stop to be blocked from replies
+            self.log(f'blocking user {author}')
+            self.block_user(author)
+          elif intent == 'reply':
+            quote = self.get_legal_quote(comment_text)
+            reply = quote.replace('{user}', f'/u/{comment.author.name}') # personalize some quotes
+            reply = reply.replace('{OP}', f'/u/{comment.submission.author.name}')
+            reply = reply.replace('{sub}', f'/r/{comment.subreddit.display_name}')
+            try:                           # try to reply to the comment
+              comment.reply(reply)
+            except APIException as e: # in case of too many requests, propagate the error
+              raise e                 # to the outer try, wait and try again
+            else:
+              print(comment_text)
+              print(reply)
+              self.register_reply(comment_id)
       except KeyboardInterrupt:
         self.log('Logging off reddit..\n')
         break

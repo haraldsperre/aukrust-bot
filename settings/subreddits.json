@@ -1,12 +1,22 @@
 {
 	"TEST": [
 		{
-			"name": "testingground4bots"
+			"name": "testingground4bots",
+			"flair-whitelist": [
+			],
+			"flair-blacklist": [
+			]
 		}
 	],
 	"PRODUCTION": [
 		{
-			"name": "norge"
+			"name": "norge",
+			"flair-blacklist": [
+				"nyheter",
+				"artikkel",
+				"politikk",
+				"covid-19"
+			]
 		},
 		{
 			"name": "nordvei"
