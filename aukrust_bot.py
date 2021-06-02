@@ -66,7 +66,11 @@ class ReplyBot:
 
   def get_intent(self, comment):
     author = comment.author.name.lower()
-    sub = next(x for x in self.subreddits_w_flairs if x['name'] == comment.subreddit.display_name)
+    try:
+      sub = next(x for x in self.subreddits_w_flairs if x['name'] == comment.subreddit.display_name)
+    except:
+      print(comment.id)
+      raise
     if (
         author == self.USER_NAME or
         author in self.blocked_users or
