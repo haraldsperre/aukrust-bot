@@ -16,13 +16,19 @@
 				"artikkel",
 				"politikk",
 				"covid-19"
+			],
+			"flair-whitelist": [
 			]
 		},
 		{
-			"name": "nordvei"
+			"name": "nordvei",
+			"flair-blacklist": [],
+			"flair-whitelist": []
 		},
 		{
-			"name": "nordicmemes"
+			"name": "nordicmemes",
+			"flair-whitelist": [],
+			"flair-blacklist": []
 		}
 	]
 }

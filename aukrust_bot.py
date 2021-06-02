@@ -94,7 +94,7 @@ class ReplyBot:
     
   def reply_bot(self):
     while True:
-      self.log(f'\n\nRunning {self.SITE_NAME} on reddit.com/r/' + self.subreddits)
+      self.log(f'\n\nRunning {self.SITE_NAME} on reddit.com/r/{self.subreddits}')
       try:
         for comment in self.reddit.subreddit(self.subreddits).stream.comments(): # continuous stream of comments
                                                                             # from chosen subreddits
