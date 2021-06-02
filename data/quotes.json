@@ -131,8 +131,8 @@
   },
   {
     "triggers": [
-      "Ludvig",
-      "Ludwig"
+      "\\bLudvig\\b",
+      "\\bLudwig\\b"
     ],
     "quotes": [
       "Hva er muffens for no 'a, {user}?",

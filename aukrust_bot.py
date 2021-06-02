@@ -52,10 +52,9 @@ class ReplyBot:
 
   def get_legal_quote(self, comment):
     for character in self.quotes:
-      if any([trigger in comment for trigger in character['triggers']]):
+      if any([re.search(trigger, comment, re.I) for trigger in character['triggers']]):
         quotes = character['quotes']
-        break
-    return choice(quotes)
+        return choice(quotes)
 
   def get_comment_from_id(self, id):
     return self.reddit.comment(id)
@@ -83,13 +82,16 @@ class ReplyBot:
       comment.body.lower().find('!stop') == 0
       ):
       return 'block'
-    if (any(re.search(keyword, comment.body, re.IGNORECASE) for keyword in self.keywords) and 
-        ( len(sub['flair-whitelist']) == 0 or
+    if ( len(sub['flair-whitelist']) == 0 or
         comment.submission.link_flair_text is None or
         comment.submission.link_flair_text.lower() in sub['flair-whitelist']
-        )):
-      return 'reply'
-
+        ):
+      for keyword in self.keywords:
+        pattern = re.compile(keyword, flags=re.IGNORECASE)
+        if pattern.search(comment.body):
+          return 'reply'
+    return False
+    
   def reply_bot(self):
     while True:
       self.log(f'\n\nRunning {self.SITE_NAME} on reddit.com/r/' + self.subreddits)
@@ -105,13 +107,15 @@ class ReplyBot:
             self.block_user(author)
           elif intent == 'reply':
             quote = self.get_legal_quote(comment_text)
-            reply = quote.replace('{user}', f'/u/{comment.author.name}') # personalize some quotes
-            reply = reply.replace('{OP}', f'/u/{comment.submission.author.name}')
-            reply = reply.replace('{sub}', f'/r/{comment.subreddit.display_name}')
             try:                           # try to reply to the comment
+              reply = quote.replace('{user}', f'/u/{comment.author.name}') # personalize some quotes
+              reply = reply.replace('{OP}', f'/u/{comment.submission.author.name}')
+              reply = reply.replace('{sub}', f'/r/{comment.subreddit.display_name}')
               comment.reply(reply)
             except APIException as e: # in case of too many requests, propagate the error
               raise e                 # to the outer try, wait and try again
+            except AttributeError as a:
+              continue
             else:
               print(comment_text)
               print(reply)
